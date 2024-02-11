@@ -89,6 +89,14 @@ class Grafana:
             method="GET", url=self._mkurl("/api/dashboards/uid/{}".format(uid))
         ))
 
+    # https://grafana.com/docs/grafana/latest/developers/http_api/dashboard/#create--update-dashboard
+    def modify_dashboard(self, data: dict) -> dict:
+        tmp = json.dumps(data)
+
+        return self._request(request.Request(
+            method="POST", url=self._mkurl("/api/dashboards/db"), data=tmp.encode()
+        ))
+
     # https://grafana.com/docs/grafana/latest/developers/http_api/dashboard/#delete-dashboard-by-uid
     def delete_dashboard(self, uid: str) -> dict:
         return self._request(request.Request(
