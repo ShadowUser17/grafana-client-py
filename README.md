@@ -5,3 +5,10 @@
 - Folder operations.
 - Dashboard operations.
 - Datasource operations.
+
+#### How to use:
+```python
+import grafana
+
+client = grafana.Grafana(grafana_url, grafana_sa_token)
+```
