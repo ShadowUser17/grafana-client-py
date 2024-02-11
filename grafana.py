@@ -83,6 +83,18 @@ class Grafana:
             method="GET", url=self._mkurl("/api/search?{}".format(data))
         ))
 
+    # https://grafana.com/docs/grafana/latest/developers/http_api/dashboard/#get-dashboard-by-uid
+    def get_dashboard_by_uid(self, uid: str) -> dict:
+        return self._request(request.Request(
+            method="GET", url=self._mkurl("/api/dashboards/uid/{}".format(uid))
+        ))
+
+    # https://grafana.com/docs/grafana/latest/developers/http_api/dashboard/#delete-dashboard-by-uid
+    def delete_dashboard(self, uid: str) -> dict:
+        return self._request(request.Request(
+            method="DELETE", url=self._mkurl("/api/dashboards/uid/{}".format(uid))
+        ))
+
     # https://grafana.com/docs/grafana/latest/developers/http_api/data_source/#get-all-data-sources
     def list_datasources(self) -> dict:
         return self._request(request.Request(
