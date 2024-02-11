@@ -73,6 +73,16 @@ class Grafana:
             method="DELETE", url=self._mkurl("/api/folders/{}".format(uid))
         ))
 
+    # https://grafana.com/docs/grafana/latest/developers/http_api/folder_dashboard_search/#search-folders-and-dashboards
+    def list_dashboards(self, folder_ids: list, page: int = 1, limit: int = 1000) -> dict:
+        data = urllib.urlencode({
+            "type": "dash-db", "limit": limit, "page": page, "folderIds": ",".join(map(str, folder_ids))
+        })
+
+        return self._request(request.Request(
+            method="GET", url=self._mkurl("/api/search?{}".format(data))
+        ))
+
     # https://grafana.com/docs/grafana/latest/developers/http_api/data_source/#get-all-data-sources
     def list_datasources(self) -> dict:
         return self._request(request.Request(
