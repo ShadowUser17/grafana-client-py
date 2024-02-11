@@ -33,14 +33,32 @@ class Grafana:
             method="GET", url=self._mkurl("/api/folders")
         ))
 
+    # https://grafana.com/docs/grafana/latest/developers/http_api/folder/#get-folder-by-uid
+    def get_folder(self, uid: str) -> dict:
+        return self._request(request.Request(
+            method="GET", url=self._mkurl("/api/folders/{}".format(uid))
+        ))
+
     # https://grafana.com/docs/grafana/latest/developers/http_api/folder/#create-folder
-    def create_folder(self, name: str) -> dict:
+    def create_folder(self, name: str, uid: str = None) -> dict:
+        uid = uid if uid else str(uuid.uuid1())
+
         data = json.dumps({
-            "uid": str(uuid.uuid1()), "title": name
+            "uid": uid, "title": name
         })
 
         return self._request(request.Request(
             method="POST", url=self._mkurl("/api/folders"), data=data.encode()
+        ))
+
+    # https://grafana.com/docs/grafana/latest/developers/http_api/folder/#update-folder
+    def update_folder(self, uid: str, name: str, version: int) -> dict:
+        data = json.dumps({
+            "title": name, "version": version
+        })
+
+        return self._request(request.Request(
+            method="PUT", url=self._mkurl("/api/folders/{}".format(uid)), data=data.encode()
         ))
 
     # https://grafana.com/docs/grafana/latest/developers/http_api/folder/#delete-folder
