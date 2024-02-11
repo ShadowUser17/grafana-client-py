@@ -84,3 +84,23 @@ class Grafana:
         return self._request(request.Request(
             method="GET", url=self._mkurl("/api/datasources/name/{}".format(name))
         ))
+
+    # https://grafana.com/docs/grafana/latest/developers/http_api/data_source/#create-a-data-source
+    def create_datasource(self, data: dict) -> dict:
+        tmp = json.dumps(data)
+
+        return self._request(request.Request(
+            method="POST", url=self._mkurl("/api/datasources"), data=tmp.encode()
+        ))
+
+    # https://grafana.com/docs/grafana/latest/developers/http_api/data_source/#delete-an-existing-data-source-by-uid
+    def delete_datasource_by_uid(self, uid: str) -> dict:
+        return self._request(request.Request(
+            method="DELETE", url=self._mkurl("/api/datasources/uid/{}".format(uid))
+        ))
+
+    # https://grafana.com/docs/grafana/latest/developers/http_api/data_source/#delete-an-existing-data-source-by-name
+    def delete_datasource_by_name(self, name: str) -> dict:
+        return self._request(request.Request(
+            method="DELETE", url=self._mkurl("/api/datasources/name/{}".format(name))
+        ))
