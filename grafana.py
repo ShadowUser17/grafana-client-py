@@ -34,7 +34,7 @@ class Grafana:
         ))
 
     # https://grafana.com/docs/grafana/latest/developers/http_api/folder/#get-folder-by-uid
-    def get_folder(self, uid: str) -> dict:
+    def get_folder_by_uid(self, uid: str) -> dict:
         return self._request(request.Request(
             method="GET", url=self._mkurl("/api/folders/{}".format(uid))
         ))
