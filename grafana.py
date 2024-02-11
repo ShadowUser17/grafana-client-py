@@ -93,6 +93,14 @@ class Grafana:
             method="POST", url=self._mkurl("/api/datasources"), data=tmp.encode()
         ))
 
+    # https://grafana.com/docs/grafana/latest/developers/http_api/data_source/#update-an-existing-data-source
+    def update_datasource(self, uid: str, data: dict) -> dict:
+        tmp = json.dumps(data)
+
+        return self._request(request.Request(
+            method="PUT", url=self._mkurl("/api/datasources/uid/{}".format(uid)), data=tmp.encode()
+        ))
+
     # https://grafana.com/docs/grafana/latest/developers/http_api/data_source/#delete-an-existing-data-source-by-uid
     def delete_datasource_by_uid(self, uid: str) -> dict:
         return self._request(request.Request(
