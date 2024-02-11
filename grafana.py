@@ -33,6 +33,12 @@ class Grafana:
             method="GET", url=self._mkurl("/api/folders")
         ))
 
+    # https://grafana.com/docs/grafana/latest/developers/http_api/folder/#get-folder-by-id
+    def get_folder_by_id(self, fid: str) -> dict:
+        return self._request(request.Request(
+            method="GET", url=self._mkurl("/api/folders/id/{}".format(fid))
+        ))
+
     # https://grafana.com/docs/grafana/latest/developers/http_api/folder/#get-folder-by-uid
     def get_folder_by_uid(self, uid: str) -> dict:
         return self._request(request.Request(
