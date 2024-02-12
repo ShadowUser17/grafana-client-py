@@ -90,7 +90,10 @@ class Grafana:
         ))
 
     # https://grafana.com/docs/grafana/latest/developers/http_api/dashboard/#create--update-dashboard
-    def modify_dashboard(self, data: dict) -> dict:
+    def modify_dashboard(self, data: dict, folder_uid: str = "") -> dict:
+        data["dashboard"]["id"] = None
+        data["folderUid"] = folder_uid
+        data["overwrite"] = True
         tmp = json.dumps(data)
 
         return self._request(request.Request(
