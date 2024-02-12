@@ -95,15 +95,18 @@ class Grafana:
         ))
 
     # https://grafana.com/docs/grafana/latest/developers/http_api/dashboard/#create--update-dashboard
-    def modify_dashboard(self, data: dict, folder_uid: str = "") -> dict:
-        data["dashboard"]["id"] = None
-        data["folderUid"] = folder_uid
+    def update_dashboard(self, data: dict) -> dict:
         data["overwrite"] = True
         tmp = json.dumps(data)
 
         return self._request(request.Request(
             method="POST", url=self._mkurl("/api/dashboards/db"), data=tmp.encode()
         ))
+
+    def create_dashboard(self, data: dict, folder_uid: str = "") -> dict:
+        data["folderUid"] = folder_uid
+        data["dashboard"]["id"] = None
+        return self.update_dashboard(data)
 
     # https://grafana.com/docs/grafana/latest/developers/http_api/dashboard/#delete-dashboard-by-uid
     def delete_dashboard(self, uid: str) -> dict:
