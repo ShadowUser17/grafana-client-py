@@ -61,14 +61,16 @@ class Grafana:
         })
 
     # https://grafana.com/docs/grafana/latest/developers/http_api/folder/#update-folder
-    def update_folder(self, uid: str, name: str, version: int) -> dict:
-        data = json.dumps({
-            "title": name, "version": version
-        })
+    def update_folder_by_raw(self, uid: str, data: dict) -> dict:
+        data["overwrite"] = True
+        tmp = json.dumps(data)
 
         return self._request(request.Request(
-            method="PUT", url=self._mkurl("/api/folders/{}".format(uid)), data=data.encode()
+            method="PUT", url=self._mkurl("/api/folders/{}".format(uid)), data=tmp.encode()
         ))
+
+    def rename_folder(self, uid: str, name: str) -> dict:
+        return self.update_folder_by_raw(uid, {"title": name})
 
     # https://grafana.com/docs/grafana/latest/developers/http_api/folder/#delete-folder
     def delete_folder(self, uid: str) -> dict:
