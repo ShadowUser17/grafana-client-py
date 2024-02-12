@@ -46,16 +46,19 @@ class Grafana:
         ))
 
     # https://grafana.com/docs/grafana/latest/developers/http_api/folder/#create-folder
+    def create_folder_by_raw(self, data: dict) -> dict:
+        tmp = json.dumps(data)
+
+        return self._request(request.Request(
+            method="POST", url=self._mkurl("/api/folders"), data=tmp.encode()
+        ))
+
     def create_folder(self, name: str, uid: str = None) -> dict:
         uid = uid if uid else str(uuid.uuid1())
 
-        data = json.dumps({
+        return self.create_folder_by_raw({
             "uid": uid, "title": name
         })
-
-        return self._request(request.Request(
-            method="POST", url=self._mkurl("/api/folders"), data=data.encode()
-        ))
 
     # https://grafana.com/docs/grafana/latest/developers/http_api/folder/#update-folder
     def update_folder(self, uid: str, name: str, version: int) -> dict:
