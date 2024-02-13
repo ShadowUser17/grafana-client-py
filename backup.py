@@ -53,5 +53,15 @@ class Backup:
             except Exception:
                 traceback.print_exc()
 
-    def backup_batasources(self) -> None:
-        pass
+    def backup_datasources(self) -> None:
+        ds_folder = self._base_path.joinpath("datasources")
+        ds_folder.mkdir(exist_ok=True)
+
+        for item in self._grafana.list_datasources():
+            try:
+                ds_file = ds_folder.joinpath("{}.json".format(item["name"]))
+                ds_file.write_text(json.dumps(item))
+                print("Store datasource data:", ds_file)
+
+            except Exception:
+                traceback.print_exc()
