@@ -1,6 +1,9 @@
+import os
 import json
+import tarfile
 import pathlib
 import grafana
+import datetime
 import traceback
 
 
@@ -10,6 +13,7 @@ class Backup:
         self._base_path = pathlib.Path(base_dir)
         self._base_path.mkdir(parents=True, exist_ok=True)
 
+        self._backup_tmpl = r"%Y%m%d%H%M"
         self._folder_data = "data.json"
         self._folder_access = "access.json"
 
@@ -17,6 +21,22 @@ class Backup:
         self.backup_folders()
         self.backup_dashboards()
         self.backup_datasources()
+
+    def create_archive(self) -> str:
+        time = datetime.datetime.now()
+        path = "{}.tgz".format(time.strftime(self._backup_tmpl))
+        path = str(self._base_path.joinpath(path))
+
+        with tarfile.open(path, "w:gz") as archive_file:
+            for (root, _, files) in os.walk(str(self._base_path)):
+                files = filter(lambda item: item.endswith(".json"), files)
+
+                for file_item in files:
+                    file_name = os.path.join(root, file_item)
+                    archive_file.add(file_name)
+
+        print("Create archive:", path)
+        return path
 
     def backup_folders(self) -> None:
         for folder_item in self._grafana.list_folders():
