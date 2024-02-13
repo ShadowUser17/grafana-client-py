@@ -53,7 +53,7 @@ class Grafana:
 
     # https://grafana.com/docs/grafana/latest/developers/http_api/folder_permissions/#update-permissions-for-a-folder
     def update_folder_permissions(self, uid: str, data: dict) -> dict:
-        tmp = json.dumps(data)
+        tmp = json.dumps({"items": data})
 
         return self._request(request.Request(
             method="POST", url=self._mkurl("/api/folders/{}/permissions".format(uid)), data=tmp.encode()
