@@ -28,7 +28,7 @@ class Grafana:
             return json.loads(client.read())
 
     # https://grafana.com/docs/grafana/latest/developers/http_api/folder/#get-all-folders
-    def list_folders(self) -> dict:
+    def list_folders(self) -> list:
         return self._request(request.Request(
             method="GET", url=self._mkurl("/api/folders")
         ))
@@ -46,7 +46,7 @@ class Grafana:
         ))
 
     # https://grafana.com/docs/grafana/latest/developers/http_api/folder_permissions/#get-permissions-for-a-folder
-    def get_folder_permissions(self, uid: str) -> dict:
+    def get_folder_permissions(self, uid: str) -> list:
         return self._request(request.Request(
             method="GET", url=self._mkurl("/api/folders/{}/permissions".format(uid))
         ))
@@ -93,7 +93,7 @@ class Grafana:
         ))
 
     # https://grafana.com/docs/grafana/latest/developers/http_api/folder_dashboard_search/#search-folders-and-dashboards
-    def list_dashboards(self, folder_ids: list, page: int = 1, limit: int = 1000) -> dict:
+    def list_dashboards(self, folder_ids: list, page: int = 1, limit: int = 1000) -> list:
         data = urllib.urlencode({
             "type": "dash-db", "limit": limit, "page": page, "folderIds": ",".join(map(str, folder_ids))
         })
@@ -129,7 +129,7 @@ class Grafana:
         ))
 
     # https://grafana.com/docs/grafana/latest/developers/http_api/data_source/#get-all-data-sources
-    def list_datasources(self) -> dict:
+    def list_datasources(self) -> list:
         return self._request(request.Request(
             method="GET", url=self._mkurl("/api/datasources")
         ))
