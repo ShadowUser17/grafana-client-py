@@ -1,11 +1,15 @@
 import os
 import json
+import boto3
 import tarfile
 import pathlib
 import grafana
 import datetime
 import traceback
 
+# AWS_ENDPOINT_URL
+# AWS_ACCESS_KEY_ID
+# AWS_SECRET_ACCESS_KEY
 
 class Backup:
     def __init__(self, client: grafana.Grafana, base_dir: str) -> None:
@@ -23,6 +27,9 @@ class Backup:
         self.backup_datasources()
 
     def create_archive(self) -> str:
+        '''
+        Return path to the archive.
+        '''
         time = datetime.datetime.now()
         path = "{}.tgz".format(time.strftime(self._backup_tmpl))
         path = str(self._base_path.joinpath(path))
@@ -37,6 +44,12 @@ class Backup:
 
         print("Create archive:", path)
         return path
+
+    def upload_archive(self, path: str, bucket: str) -> None:
+        client = boto3.client("s3")
+        file = pathlib.Path(path)
+        client.upload_file(str(file), bucket, file.name)
+        print("Upload archive:", file.name, "to S3 bucket:", bucket)
 
     def backup_folders(self) -> None:
         for folder_item in self._grafana.list_folders():
