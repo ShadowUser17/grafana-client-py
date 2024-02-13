@@ -36,7 +36,22 @@ class Backup:
                 traceback.print_exc()
 
     def backup_dashboards(self) -> None:
-        pass
+        folder_ids = self._grafana.list_folders()
+        folder_ids = map(lambda item: item["id"], folder_ids)
+
+        for dash_item in self._grafana.list_dashboards(folder_ids):
+            try:
+                folder_path = self._base_path.joinpath(str(dash_item["folderId"]))
+                folder_path = folder_path.joinpath("dashboards")
+                folder_path.mkdir(parents=True, exist_ok=True)
+
+                tmp = json.dumps(self._grafana.get_dashboard_by_uid(dash_item["uid"]))
+                dash_file = folder_path.joinpath("{}.json".format(dash_item["title"]))
+                dash_file.write_text(tmp)
+                print("Store dashboard data:", dash_file)
+
+            except Exception:
+                traceback.print_exc()
 
     def backup_batasources(self) -> None:
         pass
