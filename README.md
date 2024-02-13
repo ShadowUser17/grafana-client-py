@@ -6,7 +6,13 @@
 - Dashboard operations.
 - Datasource operations.
 
-#### How to use:
+#### Configure environment:
+```bash
+python3 -m venv --upgrade-deps env && \
+./env/bin/pip3 install -r requirements.txt
+```
+
+#### How to use Grafana client:
 ```python
 import grafana
 
@@ -20,4 +26,4 @@ python3 -c "from pathlib import Path; from json import (loads,dumps);\
 print(dumps(loads(Path(\"${DASH_SRC_FILE}\").read_text())[\"dashboard\"]))" > "${DASH_DST_FILE}"
 ```
 - Go to Grafana: `Home/Dashboards/<folder>`
-- Import dashboard from `DASH_DST_FILE` file.
+- Import dashboard from `DASH_DST_FILE`
