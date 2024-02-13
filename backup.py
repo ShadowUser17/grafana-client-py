@@ -13,6 +13,11 @@ class Backup:
         self._folder_data = "data.json"
         self._folder_access = "access.json"
 
+    def backup_all(self) -> None:
+        self.backup_folders()
+        self.backup_dashboards()
+        self.backup_datasources()
+
     def backup_folders(self) -> None:
         for folder_item in self._grafana.list_folders():
             try:
@@ -20,13 +25,11 @@ class Backup:
                 folder_path.mkdir(exist_ok=True)
                 print("Create folder directory:", folder_path)
 
-                # Store folder object in data.json
                 tmp = json.dumps(self._grafana.get_folder_by_uid(folder_item["uid"]))
                 folder_data = folder_path.joinpath(self._folder_data)
                 folder_data.write_text(tmp)
                 print("Store folder data:", folder_data)
 
-                # Store folder permissions to access.json
                 tmp = json.dumps(self._grafana.get_folder_permissions(folder_item["uid"]))
                 folder_access = folder_path.joinpath(self._folder_access)
                 folder_access.write_text(tmp)
