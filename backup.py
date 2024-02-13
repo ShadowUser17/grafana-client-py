@@ -7,9 +7,13 @@ import grafana
 import datetime
 import traceback
 
+# GRAFANA_URL
+# GRAFANA_TOKEN
+# AWS_S3_BUCKET
 # AWS_ENDPOINT_URL
 # AWS_ACCESS_KEY_ID
 # AWS_SECRET_ACCESS_KEY
+
 
 class Backup:
     def __init__(self, client: grafana.Grafana, base_dir: str) -> None:
@@ -101,3 +105,15 @@ class Backup:
 
             except Exception:
                 traceback.print_exc()
+
+
+if __name__ == "__main__":
+    grafana_client = grafana.Grafana(
+        url=os.environ.get("GRAFANA_URL", ""),
+        token=os.environ.get("GRAFANA_TOKEN", "")
+    )
+
+    grafana_backup = Backup(grafana_client, "./data")
+    grafana_backup.backup_all()
+    archive = grafana_backup.create_archive()
+    grafana_backup.upload_archive(archive, os.environ.get("AWS_S3_BUCKET", ""))
