@@ -22,6 +22,11 @@ python3 -m venv --upgrade-deps env && \
 docker build -t "shadowuser17/grafana-data-backup:latest" .
 ```
 
+#### Scan docker image:
+```bash
+trivy image "shadowuser17/grafana-data-backup:latest"
+```
+
 #### Publish docker image:
 ```bash
 docker login -u "${DOCKERHUB_LOGIN}" -p "${DOCKERHUB_TOKEN}"
