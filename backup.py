@@ -54,12 +54,14 @@ class Backup:
         print("Create archive:", path)
         return path
 
+    # https://boto3.amazonaws.com/v1/documentation/api/latest/guide/s3-uploading-files.html
     def upload_archive(self, path: str, bucket: str) -> None:
         client = boto3.client("s3")
         file = pathlib.Path(path)
         client.upload_file(str(file), bucket, file.name)
         print("Upload archive:", file.name, "to S3 bucket:", bucket)
 
+    # https://api.slack.com/messaging/sending#publishing
     def send_notification(self, token: str, channel: str, message: str) -> None:
         if token and channel:
             data = json.dumps({"channel": channel, "text": message})
