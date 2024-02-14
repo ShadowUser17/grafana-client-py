@@ -1,4 +1,5 @@
 import os
+import sys
 import json
 import boto3
 import tarfile
@@ -57,63 +58,56 @@ class Backup:
 
     def backup_folders(self) -> None:
         for folder_item in self._grafana.list_folders():
-            try:
-                folder_path = self._base_path.joinpath(str(folder_item["id"]))
-                folder_path.mkdir(exist_ok=True)
-                print("Create folder directory:", folder_path)
+            folder_path = self._base_path.joinpath(str(folder_item["id"]))
+            folder_path.mkdir(exist_ok=True)
+            print("Create folder directory:", folder_path)
 
-                tmp = json.dumps(self._grafana.get_folder_by_uid(folder_item["uid"]))
-                folder_data = folder_path.joinpath(self._folder_data)
-                folder_data.write_text(tmp)
-                print("Store folder data:", folder_data)
+            tmp = json.dumps(self._grafana.get_folder_by_uid(folder_item["uid"]))
+            folder_data = folder_path.joinpath(self._folder_data)
+            folder_data.write_text(tmp)
+            print("Store folder data:", folder_data)
 
-                tmp = json.dumps(self._grafana.get_folder_permissions(folder_item["uid"]))
-                folder_access = folder_path.joinpath(self._folder_access)
-                folder_access.write_text(tmp)
-                print("Store folder access:", folder_access)
-
-            except Exception:
-                traceback.print_exc()
+            tmp = json.dumps(self._grafana.get_folder_permissions(folder_item["uid"]))
+            folder_access = folder_path.joinpath(self._folder_access)
+            folder_access.write_text(tmp)
+            print("Store folder access:", folder_access)
 
     def backup_dashboards(self) -> None:
         folder_ids = self._grafana.list_folders()
         folder_ids = map(lambda item: item["id"], folder_ids)
 
         for dash_item in self._grafana.list_dashboards(folder_ids):
-            try:
-                folder_path = self._base_path.joinpath(str(dash_item["folderId"]))
-                folder_path = folder_path.joinpath("dashboards")
-                folder_path.mkdir(parents=True, exist_ok=True)
+            folder_path = self._base_path.joinpath(str(dash_item["folderId"]))
+            folder_path = folder_path.joinpath("dashboards")
+            folder_path.mkdir(parents=True, exist_ok=True)
 
-                tmp = json.dumps(self._grafana.get_dashboard_by_uid(dash_item["uid"]))
-                dash_file = folder_path.joinpath("{}.json".format(dash_item["title"]))
-                dash_file.write_text(tmp)
-                print("Store dashboard data:", dash_file)
-
-            except Exception:
-                traceback.print_exc()
+            tmp = json.dumps(self._grafana.get_dashboard_by_uid(dash_item["uid"]))
+            dash_file = folder_path.joinpath("{}.json".format(dash_item["title"]))
+            dash_file.write_text(tmp)
+            print("Store dashboard data:", dash_file)
 
     def backup_datasources(self) -> None:
         ds_folder = self._base_path.joinpath("datasources")
         ds_folder.mkdir(exist_ok=True)
 
         for item in self._grafana.list_datasources():
-            try:
-                ds_file = ds_folder.joinpath("{}.json".format(item["name"]))
-                ds_file.write_text(json.dumps(item))
-                print("Store datasource data:", ds_file)
-
-            except Exception:
-                traceback.print_exc()
+            ds_file = ds_folder.joinpath("{}.json".format(item["name"]))
+            ds_file.write_text(json.dumps(item))
+            print("Store datasource data:", ds_file)
 
 
 if __name__ == "__main__":
-    grafana_client = grafana.Grafana(
-        url=os.environ.get("GRAFANA_URL", ""),
-        token=os.environ.get("GRAFANA_TOKEN", "")
-    )
+    try:
+        grafana_client = grafana.Grafana(
+            url=os.environ.get("GRAFANA_URL", ""),
+            token=os.environ.get("GRAFANA_TOKEN", "")
+        )
 
-    grafana_backup = Backup(grafana_client, "./data")
-    grafana_backup.backup_all()
-    archive = grafana_backup.create_archive()
-    grafana_backup.upload_archive(archive, os.environ.get("AWS_S3_BUCKET", ""))
+        grafana_backup = Backup(grafana_client, "./data")
+        grafana_backup.backup_all()
+        archive = grafana_backup.create_archive()
+        grafana_backup.upload_archive(archive, os.environ.get("AWS_S3_BUCKET", ""))
+
+    except Exception:
+        traceback.print_exc()
+        sys.exit(1)
