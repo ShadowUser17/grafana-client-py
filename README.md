@@ -24,6 +24,19 @@ import grafana
 client = grafana.Grafana(grafana_url, grafana_sa_token)
 ```
 
+#### How to run Backup tool:
+```bash
+export AWS_S3_BUCKET="backups"
+export GRAFANA_URL="https://grafana.k3s/"
+export GRAFANA_TOKEN=""
+export AWS_ENDPOINT_URL="http://minio-api.k3s"
+export AWS_ACCESS_KEY_ID=""
+export AWS_SECRET_ACCESS_KEY=""
+```
+```bash
+./env/bin/python3 backup.py
+```
+
 #### Manually restore dashboard:
 - Remove dashboard metadata:
 ```bash
