@@ -1,0 +1,48 @@
+apiVersion: "v1"
+kind: "ServiceAccount"
+metadata:
+  name: "grafana-backup"
+  namespace: "monitoring"
+  annotations:
+    eks.amazonaws.com/role-arn: ""
+    eks.amazonaws.com/sts-regional-endpoints: "true"
+
+---
+apiVersion: "batch/v1"
+kind: "CronJob"
+metadata:
+  name: "grafana-backup"
+  namespace: "monitoring"
+spec:
+  schedule: "@weekly"
+  jobTemplate:
+    metadata:
+      labels:
+        app: "grafana-backup"
+    spec:
+      backoffLimit: 3
+      template:
+        spec:
+          restartPolicy: "Never"
+          serviceAccountName: "grafana-backup"
+          containers:
+            - name: "app"
+              image: "shadowuser17/grafana-data-backup:latest"
+              imagePullPolicy: "Always"
+              env:
+                - name: "GRAFANA_URL"
+                  value: ""
+                - name: "GRAFANA_TOKEN"
+                  value: ""
+                - name: "SLACK_API_URL"
+                  value: ""
+                - name: "SLACK_CHANNEL"
+                  value: ""
+                - name: "AWS_ENDPOINT_URL"
+                  value: ""
+                - name: "AWS_S3_BUCKET"
+                  value: ""
+                - name: "AWS_ACCESS_KEY_ID"
+                  value: ""
+                - name: "AWS_SECRET_ACCESS_KEY"
+                  value: ""
