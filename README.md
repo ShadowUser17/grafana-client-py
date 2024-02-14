@@ -35,6 +35,11 @@ docker login -u "${DOCKERHUB_LOGIN}" -p "${DOCKERHUB_TOKEN}"
 docker push --all-tags "shadowuser17/grafana-data-backup"
 ```
 
+#### How to deploy to K8S:
+- For AWS deploy need to create policy and role first!
+- Get cronjob from `examples` and edit.
+- Apply the edited file from `kubectl` command.
+
 #### How to use Grafana client:
 ```python
 import grafana
