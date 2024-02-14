@@ -8,8 +8,12 @@ import grafana
 import datetime
 import traceback
 
+from urllib import request
+
 # GRAFANA_URL
 # GRAFANA_TOKEN
+# SLACK_TOKEN
+# SLACK_CHANNEL
 # AWS_S3_BUCKET
 # AWS_ENDPOINT_URL
 # AWS_ACCESS_KEY_ID
@@ -55,6 +59,19 @@ class Backup:
         file = pathlib.Path(path)
         client.upload_file(str(file), bucket, file.name)
         print("Upload archive:", file.name, "to S3 bucket:", bucket)
+
+    def send_notification(self, token: str, channel: str, message: str) -> None:
+        if token and channel:
+            data = json.dumps({"channel": channel, "text": message})
+
+            req = request.Request(
+                method="POST", url="https://slack.com/api/chat.postMessage",
+                headers={"Content-type": "application/json", "Authorization": "Bearer {}".format(token)},
+                data=data.encode()
+            )
+
+            with request.urlopen(req) as client:
+                print(client.read())
 
     def backup_folders(self) -> None:
         for folder_item in self._grafana.list_folders():
@@ -106,7 +123,14 @@ if __name__ == "__main__":
         grafana_backup = Backup(grafana_client, "./data")
         grafana_backup.backup_all()
         archive = grafana_backup.create_archive()
-        grafana_backup.upload_archive(archive, os.environ.get("AWS_S3_BUCKET", ""))
+        bucket = os.environ.get("AWS_S3_BUCKET", "")
+        grafana_backup.upload_archive(archive, bucket)
+
+        grafana_backup.send_notification(
+            token=os.environ.get("SLACK_TOKEN", ""),
+            channel=os.environ.get("SLACK_CHANNEL", ""),
+            message="Successfully upload {} to S3 {}!".format(archive, bucket)
+        )
 
     except Exception:
         traceback.print_exc()
