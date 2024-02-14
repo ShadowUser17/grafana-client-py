@@ -17,6 +17,19 @@ python3 -m venv --upgrade-deps env && \
 ./env/bin/flake8 --ignore="E501" *.py
 ```
 
+#### Build docker image:
+```bash
+docker build -t "shadowuser17/grafana-data-backup:latest" .
+```
+
+#### Publish docker image:
+```bash
+docker login -u "${DOCKERHUB_LOGIN}" -p "${DOCKERHUB_TOKEN}"
+```
+```bash
+docker push --all-tags "shadowuser17/grafana-data-backup"
+```
+
 #### How to use Grafana client:
 ```python
 import grafana
