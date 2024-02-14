@@ -12,7 +12,7 @@ from urllib import request
 
 # GRAFANA_URL
 # GRAFANA_TOKEN
-# SLACK_TOKEN
+# SLACK_API_URL
 # SLACK_CHANNEL
 # AWS_S3_BUCKET
 # AWS_ENDPOINT_URL
@@ -61,19 +61,18 @@ class Backup:
         client.upload_file(str(file), bucket, file.name)
         print("Upload archive:", file.name, "to S3 bucket:", bucket)
 
-    # https://api.slack.com/messaging/sending#publishing
-    def send_notification(self, token: str, channel: str, message: str) -> None:
-        if token and channel:
+    # https://api.slack.com/messaging/webhooks#advanced_message_formatting
+    def send_notification(self, api_url: str, channel: str, message: str) -> int:
+        if api_url and channel:
             data = json.dumps({"channel": channel, "text": message})
+            headers = {"Content-type": "application/json"}
 
             req = request.Request(
-                method="POST", url="https://slack.com/api/chat.postMessage",
-                headers={"Content-type": "application/json", "Authorization": "Bearer {}".format(token)},
-                data=data.encode()
+                method="POST", url=api_url, headers=headers, data=data.encode()
             )
 
             with request.urlopen(req) as client:
-                print(client.read())
+                return client.status
 
     def backup_folders(self) -> None:
         for folder_item in self._grafana.list_folders():
@@ -129,7 +128,7 @@ if __name__ == "__main__":
         grafana_backup.upload_archive(archive, bucket)
 
         grafana_backup.send_notification(
-            token=os.environ.get("SLACK_TOKEN", ""),
+            api_url=os.environ.get("SLACK_API_URL", ""),
             channel=os.environ.get("SLACK_CHANNEL", ""),
             message="Successfully upload {} to S3 {}!".format(archive, bucket)
         )
