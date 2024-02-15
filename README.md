@@ -40,6 +40,16 @@ docker push --all-tags "shadowuser17/grafana-data-backup"
 - Get cronjob from `examples` and edit.
 - Apply the edited file from `kubectl` command.
 
+#### Change cronjob schedule time:
+```bash
+kubectl -n testing patch cronjob grafana-backup -p '{"spec": {"schedule": "*/5 * * * *"}}'
+```
+
+#### Disable cronjob manually:
+```bash
+kubectl -n testing patch cronjob grafana-backup -p '{"spec": {"suspend": true}}'
+```
+
 #### How to use Grafana client:
 ```python
 import grafana
