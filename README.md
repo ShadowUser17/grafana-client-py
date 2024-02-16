@@ -50,6 +50,11 @@ kubectl -n testing patch cronjob grafana-backup -p '{"spec": {"schedule": "*/5 *
 kubectl -n testing patch cronjob grafana-backup -p '{"spec": {"suspend": true}}'
 ```
 
+#### Delete jobs generated from cronjob:
+```bash
+kubectl -n testing delete jobs -l "app=grafana-backup"
+```
+
 #### How to use Grafana client:
 ```python
 import grafana
