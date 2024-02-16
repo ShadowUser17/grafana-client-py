@@ -66,6 +66,7 @@ class Backup:
         if api_url and channel:
             data = json.dumps({
                 "username": "grafana-backup-tool", "channel": channel,
+                "icon_url": "https://grafana.com/img/fav32.png",
                 "attachments": [{
                     "title": "Backup data from instance: {}".format(self._grafana._url),
                     "color": "#BDFFC3", "text": message
