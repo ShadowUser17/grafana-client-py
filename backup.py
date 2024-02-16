@@ -61,11 +61,15 @@ class Backup:
         client.upload_file(str(file), bucket, file.name)
         print("Upload archive: {} to S3 bucket: s3://{}".format(file.name, bucket))
 
-    # https://api.slack.com/messaging/webhooks#advanced_message_formatting
+    # https://api.slack.com/reference/surfaces/formatting#building-attachments
     def send_notification(self, api_url: str, channel: str, message: str) -> int:
         if api_url and channel:
             data = json.dumps({
-                "username": "grafana-backup", "channel": channel, "text": message
+                "username": "grafana-backup-tool", "channel": channel,
+                "attachments": [{
+                    "title": "Backup data from instance: {}".format(self._grafana._url),
+                    "color": "#BDFFC3", "text": message
+                }]
             })
 
             headers = {"Content-type": "application/json"}
@@ -132,7 +136,7 @@ if __name__ == "__main__":
         grafana_backup.send_notification(
             api_url=os.environ.get("SLACK_API_URL", ""),
             channel=os.environ.get("SLACK_CHANNEL", ""),
-            message="Successfully upload {} to s3://{}".format(archive, bucket)
+            message="Successfully upload {} to s3://{}/".format(archive, bucket)
         )
 
     except Exception:
