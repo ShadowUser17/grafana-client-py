@@ -15,6 +15,7 @@ metadata:
   namespace: "monitoring"
 spec:
   schedule: "@weekly"
+  concurrencyPolicy: "Replace"
   jobTemplate:
     metadata:
       labels:

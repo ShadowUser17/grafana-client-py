@@ -12,6 +12,7 @@ metadata:
   namespace: "testing"
 spec:
   schedule: "@daily"
+  concurrencyPolicy: "Replace"
   jobTemplate:
     metadata:
       labels:
