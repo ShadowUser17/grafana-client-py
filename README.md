@@ -26,6 +26,9 @@ docker build -t "shadowuser17/grafana-data-backup:latest" .
 ```bash
 trivy image "shadowuser17/grafana-data-backup:latest"
 ```
+```bash
+trivy image -f json -o report.json --list-all-pkgs "shadowuser17/grafana-data-backup:latest"
+```
 
 #### Publish docker image:
 ```bash
