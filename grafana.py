@@ -134,6 +134,12 @@ class Grafana:
             method="GET", url=self._mkurl("/api/datasources")
         ))
 
+    # https://grafana.com/docs/grafana/latest/developers/http_api/data_source/#get-a-single-data-source-by-id
+    def get_datasource_by_id(self, ds_id: str) -> dict:
+        return self._request(request.Request(
+            method="GET", url=self._mkurl("/api/datasources/{}".format(ds_id))
+        ))
+
     # https://grafana.com/docs/grafana/latest/developers/http_api/data_source/#get-a-single-data-source-by-uid
     def get_datasource_by_uid(self, uid: str) -> dict:
         return self._request(request.Request(
@@ -160,6 +166,20 @@ class Grafana:
 
         return self._request(request.Request(
             method="PUT", url=self._mkurl("/api/datasources/uid/{}".format(uid)), data=tmp.encode()
+        ))
+
+    # https://grafana.com/docs/grafana/latest/developers/http_api/data_source/#update-an-existing-data-source-by-id
+    def update_datasource_by_id(self, ds_id: str, data: dict) -> dict:
+        tmp = json.dumps(data)
+
+        return self._request(request.Request(
+            method="PUT", url=self._mkurl("/api/datasources/{}".format(ds_id)), data=tmp.encode()
+        ))
+
+    # https://grafana.com/docs/grafana/latest/developers/http_api/data_source/#delete-an-existing-data-source-by-id
+    def delete_datasource_by_id(self, ds_id: str) -> dict:
+        return self._request(request.Request(
+            method="DELETE", url=self._mkurl("/api/datasources/{}".format(ds_id))
         ))
 
     # https://grafana.com/docs/grafana/latest/developers/http_api/data_source/#delete-an-existing-data-source-by-uid
