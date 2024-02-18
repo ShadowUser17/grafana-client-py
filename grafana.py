@@ -34,9 +34,9 @@ class Grafana:
         ))
 
     # https://grafana.com/docs/grafana/latest/developers/http_api/folder/#get-folder-by-id
-    def get_folder_by_id(self, fid: str) -> dict:
+    def get_folder_by_id(self, folder_id: int) -> dict:
         return self._request(request.Request(
-            method="GET", url=self._mkurl("/api/folders/id/{}".format(fid))
+            method="GET", url=self._mkurl("/api/folders/id/{}".format(folder_id))
         ))
 
     # https://grafana.com/docs/grafana/latest/developers/http_api/folder/#get-folder-by-uid
@@ -135,7 +135,7 @@ class Grafana:
         ))
 
     # https://grafana.com/docs/grafana/latest/developers/http_api/data_source/#get-a-single-data-source-by-id
-    def get_datasource_by_id(self, ds_id: str) -> dict:
+    def get_datasource_by_id(self, ds_id: int) -> dict:
         return self._request(request.Request(
             method="GET", url=self._mkurl("/api/datasources/{}".format(ds_id))
         ))
@@ -169,7 +169,7 @@ class Grafana:
         ))
 
     # https://grafana.com/docs/grafana/latest/developers/http_api/data_source/#update-an-existing-data-source-by-id
-    def update_datasource_by_id(self, ds_id: str, data: dict) -> dict:
+    def update_datasource_by_id(self, ds_id: int, data: dict) -> dict:
         tmp = json.dumps(data)
 
         return self._request(request.Request(
@@ -177,7 +177,7 @@ class Grafana:
         ))
 
     # https://grafana.com/docs/grafana/latest/developers/http_api/data_source/#delete-an-existing-data-source-by-id
-    def delete_datasource_by_id(self, ds_id: str) -> dict:
+    def delete_datasource_by_id(self, ds_id: int) -> dict:
         return self._request(request.Request(
             method="DELETE", url=self._mkurl("/api/datasources/{}".format(ds_id))
         ))

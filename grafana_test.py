@@ -20,7 +20,7 @@ def test_folder_functions(client: grafana.Grafana) -> None:
     print("rename_folder: ({}, {})".format(resp.get("id"), resp.get("title")))
 
     time.sleep(1.0)
-    resp = client.get_folder_by_id(str(folder_id))
+    resp = client.get_folder_by_id(folder_id)
     print("get_folder_by_id: ({}, {})".format(resp.get("id"), resp.get("title")))
 
     time.sleep(1.0)
@@ -55,17 +55,17 @@ def test_datasource_functions(client: grafana.Grafana) -> None:
     print("create_datasource: ({}, {})".format(ds_id, ds_uid))
 
     time.sleep(1.0)
-    resp = client.get_datasource_by_id(str(ds_id))
+    resp = client.get_datasource_by_id(ds_id)
     print("get_datasource_by_id: ({}, {})".format(resp.get("id"), resp.get("name")))
 
     time.sleep(1.0)
     resp["jsonData"] = {"maxLines": 1000, "timeout": 300}
-    client.update_datasource_by_id(str(ds_id), resp)
-    resp = client.get_datasource_by_id(str(ds_id))
+    client.update_datasource_by_id(ds_id, resp)
+    resp = client.get_datasource_by_id(ds_id)
     print("update_datasource_by_id: {}".format(resp.get("jsonData")))
 
     time.sleep(1.0)
-    resp = client.delete_datasource_by_id(str(ds_id))
+    resp = client.delete_datasource_by_id(ds_id)
     print("delete_datasource_by_id: {}".format(resp))
 
 
