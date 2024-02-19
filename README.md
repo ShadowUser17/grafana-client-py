@@ -22,6 +22,11 @@ python3 -m venv --upgrade-deps env && \
 ./env/bin/flake8 --ignore="E501" *.py
 ```
 
+#### Run unit tests:
+```bash
+./env/bin/python3 grafana_test.py -v
+```
+
 #### Build docker image:
 ```bash
 docker build -t "shadowuser17/grafana-data-backup:latest" .

@@ -1,9 +1,9 @@
 import os
-import time
 import grafana
 import unittest
 
 
+# https://docs.python.org/3/library/unittest.html
 class TestGrafanaAPI(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
@@ -12,110 +12,101 @@ class TestGrafanaAPI(unittest.TestCase):
             token=os.environ.get("GRAFANA_TOKEN", "")
         )
 
-    def test_folder_functions(self) -> None:
-        resp = self.client.list_folders()
-        print("list_folders:")
-        for item in resp:
-            print("\t{}: ({}, {})".format(item.get("title"), item.get("id"), item.get("uid")))
+        data = cls.client.create_folder("test_grafana_folder")
+        cls.data_folder_uid = data.get("uid")
 
-        time.sleep(1.0)
-        resp = self.client.create_folder("test_grafana_api_v1")
-        folder_id = resp.get("id")
-        folder_uid = resp.get("uid")
-        print("create_folder: ({}, {})".format(folder_id, folder_uid))
-
-        time.sleep(1.0)
-        resp = self.client.rename_folder(folder_uid, "test_grafana_api_v2")
-        print("rename_folder: ({}, {})".format(resp.get("id"), resp.get("title")))
-
-        time.sleep(1.0)
-        resp = self.client.get_folder_by_id(folder_id)
-        print("get_folder_by_id: ({}, {})".format(resp.get("id"), resp.get("title")))
-
-        time.sleep(1.0)
-        resp = self.client.get_folder_by_uid(folder_uid)
-        print("get_folder_by_uid: ({}, {})".format(resp.get("uid"), resp.get("title")))
-
-        time.sleep(1.0)
-        resp = self.client.get_folder_permissions(folder_uid)
-        print("get_folder_permissions:")
-        for item in resp:
-            print("\t{}: {}/{}: {}".format(item.get("title"), item.get("teamId"), item.get("userId"), item.get("role")))
-
-        time.sleep(1.0)
-        resp = self.client.delete_folder(folder_uid)
-        print("delete_folder: {}".format(resp))
-
-    def test_datasource_functions(self) -> None:
-        resp = self.client.list_datasources()
-        print("list_datasources:")
-        for item in resp:
-            print("\t{}: {} RO: {}".format(item.get("id"), item.get("name"), item.get("readOnly")))
-
-        time.sleep(1.0)
-        resp = self.client.create_datasource({
-            "name": "test_grafana_api", "type": "loki",
-            "access": "proxy", "url": "http://loki.monitoring.svc:3100"
-        })
-
-        ds_id = resp.get("id")
-        ds_uid = resp.get("uid")
-        print("create_datasource: ({}, {})".format(ds_id, ds_uid))
-
-        time.sleep(1.0)
-        resp = self.client.get_datasource_by_id(ds_id)
-        print("get_datasource_by_id: ({}, {})".format(resp.get("id"), resp.get("name")))
-
-        time.sleep(1.0)
-        resp["jsonData"] = {"maxLines": 1000, "timeout": 300}
-        self.client.update_datasource_by_id(ds_id, resp)
-        resp = self.client.get_datasource_by_id(ds_id)
-        print("update_datasource_by_id: {}".format(resp.get("jsonData")))
-
-        time.sleep(1.0)
-        resp = self.client.delete_datasource_by_id(ds_id)
-        print("delete_datasource_by_id: {}".format(resp))
-
-    def test_dashboard_functions(self) -> None:
-        resp = self.client.create_folder("test_grafana_dashboards")
-        folder_uid = resp.get("uid")
-        print("create_folder: ({}, {})".format(folder_uid, resp.get("title")))
-
-        time.sleep(1.0)
         data = {"dashboard": {
-            "id": None, "uid": None,
-            "title": "testing_dashboard",
-            "timezone": "browser",
-            "schemaVersion": 16,
-            "refresh": "30s"
+            "id": None, "uid": None, "title": "test_grafana_dashboard",
+            "timezone": "browser", "schemaVersion": 16, "refresh": "30s"
         }}
-        resp = self.client.create_dashboard(data, folder_uid)
-        dashboard_uid = resp.get("uid")
-        print("create_dashboard: ({}, {})".format(resp.get("id"), resp.get("slug")))
+        data = cls.client.create_dashboard(data, cls.data_folder_uid)
+        cls.data_dashboard_uid = data.get("uid")
 
-        time.sleep(1.0)
-        resp = self.client.get_dashboard_by_uid(dashboard_uid)
+        data = {
+            "name": "test_grafana_datasource", "type": "loki",
+            "access": "proxy", "url": "http://loki.monitoring.svc:3100"
+        }
+        data = cls.client.create_datasource(data)
+        cls.data_datasource_id = data.get("id")
+
+    @classmethod
+    def tearDownClass(cls) -> None:
+        cls.client.delete_datasource_by_id(cls.data_datasource_id)
+        cls.client.delete_dashboard(cls.data_dashboard_uid)
+        cls.client.delete_folder(cls.data_folder_uid)
+
+    def test_list_folders(self) -> None:
+        resp = self.client.list_folders()
+        self.assertIsNot(resp, list)
+        self.assertTrue(resp)
+
+    def test_get_folder(self) -> None:
+        resp = self.client.get_folder_by_uid(self.data_folder_uid)
+        self.assertIsNot(resp, dict)
+        self.assertEqual(resp.get("uid"), self.data_folder_uid)
+
+    def test_folder_permissions(self) -> None:
+        resp = self.client.get_folder_permissions(self.data_folder_uid)
+        self.assertIsNot(resp, list)
+        self.assertTrue(resp)
+
+    def test_update_folder(self) -> None:
+        folder_name = "test_grafana_v1"
+        resp = self.client.rename_folder(self.data_folder_uid, folder_name)
+        self.assertIsNot(resp, dict)
+        self.assertEqual(resp.get("title"), folder_name)
+
+    def test_list_dashboards(self) -> None:
+        resp = self.client.list_dashboards(folder_ids=[0])
+        self.assertIsNot(resp, list)
+        self.assertTrue(resp)
+
+    def test_get_dashboard(self) -> None:
+        resp = self.client.get_dashboard_by_uid(self.data_dashboard_uid)
+        self.assertIsNot(resp, dict)
         data = resp.get("dashboard")
-        print("get_dashboard_by_uid: ({}, {})".format(data.get("id"), data.get("version")))
+        self.assertEqual(data.get("uid"), self.data_dashboard_uid)
 
-        time.sleep(1.0)
-        data = resp
-        data["dashboard"]["title"] = "testing_dashboard_v2"
-        resp = self.client.update_dashboard(data)
-        print("update_dashboard: ({}, {})".format(resp.get("id"), resp.get("slug")))
-
-        time.sleep(1.0)
-        resp = self.client.get_dashboard_by_uid(dashboard_uid)
+    def test_update_dashboard(self) -> None:
+        resp = self.client.get_dashboard_by_uid(self.data_dashboard_uid)
+        self.assertIsNot(resp, dict)
         data = resp.get("dashboard")
-        print("get_dashboard_by_uid: ({}, {})".format(data.get("id"), data.get("version")))
+        self.assertEqual(data.get("uid"), self.data_dashboard_uid)
 
-        time.sleep(1.0)
-        resp = self.client.delete_dashboard(dashboard_uid)
-        print("delete_dashboard: {}".format(resp))
+        dashboard_title = "test_grafana_v1"
+        resp["dashboard"]["title"] = dashboard_title
+        resp = self.client.update_dashboard(resp)
+        self.assertIsNot(resp, dict)
 
-        time.sleep(1.0)
-        resp = self.client.delete_folder(folder_uid)
-        print("delete_folder: {}".format(resp))
+        resp = self.client.get_dashboard_by_uid(self.data_dashboard_uid)
+        self.assertIsNot(resp, dict)
+        data = resp.get("dashboard")
+        self.assertEqual(data.get("title"), dashboard_title)
+
+    def test_list_datasources(self) -> None:
+        resp = self.client.list_datasources()
+        self.assertIsNot(resp, list)
+        self.assertTrue(resp)
+
+    def test_get_datasource(self) -> None:
+        resp = self.client.get_datasource_by_id(self.data_datasource_id)
+        self.assertIsNot(resp, dict)
+        self.assertEqual(resp.get("id"), self.data_datasource_id)
+
+    def test_update_datasource(self) -> None:
+        resp = self.client.get_datasource_by_id(self.data_datasource_id)
+        self.assertIsNot(resp, dict)
+        self.assertEqual(resp.get("id"), self.data_datasource_id)
+
+        data = {"maxLines": 1000, "timeout": 300}
+        resp["jsonData"] = data
+        resp = self.client.update_datasource_by_id(self.data_datasource_id, resp)
+        self.assertIsNot(resp, dict)
+
+        resp = self.client.get_datasource_by_id(self.data_datasource_id)
+        self.assertIsNot(resp, dict)
+        self.assertEqual(resp.get("id"), self.data_datasource_id)
+        self.assertEqual(resp.get("jsonData"), data)
 
 
 if __name__ == "__main__":
