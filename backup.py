@@ -142,12 +142,12 @@ if __name__ == "__main__":
             message="Successfully upload {} to s3://{}/".format(archive, bucket)
         )
 
-    except Exception:
+    except Exception as error:
         traceback.print_exc()
 
         grafana_backup.send_notification(
             api_url=os.environ.get("SLACK_API_URL", ""),
             channel=os.environ.get("SLACK_CHANNEL", ""),
-            message="Backup failure!", is_failed=True
+            message="Failure: ({})".format(error), is_failed=True
         )
         sys.exit(1)
