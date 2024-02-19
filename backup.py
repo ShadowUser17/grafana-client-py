@@ -68,7 +68,7 @@ class Backup:
                 "username": "grafana-backup-tool", "channel": channel,
                 "icon_url": "https://grafana.com/img/fav32.png",
                 "attachments": [{
-                    "title": "Backup data from instance: {}".format(self._grafana._url),
+                    "title": "Backup data from instance: {}".format(self._grafana.url.geturl()),
                     "color": "#BDFFC3", "text": message
                 }]
             })

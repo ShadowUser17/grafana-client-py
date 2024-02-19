@@ -27,6 +27,10 @@ class Grafana:
         with request.urlopen(url=req, context=ctx) as client:
             return json.loads(client.read())
 
+    @property
+    def url(self) -> urllib.ParseResult:
+        return urllib.urlparse(self._url)
+
     # https://grafana.com/docs/grafana/latest/developers/http_api/folder/#get-all-folders
     def list_folders(self) -> list:
         return self._request(request.Request(
