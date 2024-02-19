@@ -24,8 +24,6 @@ class Backup:
     def __init__(self, client: grafana.Grafana, base_dir: str) -> None:
         self._grafana = client
         self._base_path = pathlib.Path(base_dir)
-        self._base_path.mkdir(parents=True, exist_ok=True)
-
         self._backup_tmpl = r"%Y%m%d%H%M"
         self._folder_data = "data.json"
         self._folder_access = "access.json"
@@ -62,14 +60,16 @@ class Backup:
         print("Upload archive: {} to S3 bucket: s3://{}".format(file.name, bucket))
 
     # https://api.slack.com/reference/surfaces/formatting#building-attachments
-    def send_notification(self, api_url: str, channel: str, message: str) -> int:
+    def send_notification(self, api_url: str, channel: str, message: str, is_failed: bool = False) -> int:
+        color = "#FF9FA1" if is_failed else "#BDFFC3"
+
         if api_url and channel:
             data = json.dumps({
                 "username": "grafana-backup-tool", "channel": channel,
                 "icon_url": "https://grafana.com/img/fav32.png",
                 "attachments": [{
                     "title": "Backup data from instance: {}".format(self._grafana.url.geturl()),
-                    "color": "#BDFFC3", "text": message
+                    "color": color, "text": message
                 }]
             })
 
@@ -82,6 +82,8 @@ class Backup:
                 return client.status
 
     def backup_folders(self) -> None:
+        self._base_path.mkdir(parents=True, exist_ok=True)
+
         for folder_item in self._grafana.list_folders():
             folder_path = self._base_path.joinpath(str(folder_item["id"]))
             folder_path.mkdir(exist_ok=True)
@@ -113,7 +115,7 @@ class Backup:
 
     def backup_datasources(self) -> None:
         ds_folder = self._base_path.joinpath("datasources")
-        ds_folder.mkdir(exist_ok=True)
+        ds_folder.mkdir(parents=True, exist_ok=True)
 
         for item in self._grafana.list_datasources():
             ds_file = ds_folder.joinpath("{}.json".format(item["name"]))
@@ -122,13 +124,13 @@ class Backup:
 
 
 if __name__ == "__main__":
-    try:
-        grafana_client = grafana.Grafana(
-            url=os.environ.get("GRAFANA_URL", ""),
-            token=os.environ.get("GRAFANA_TOKEN", "")
-        )
+    grafana_client = grafana.Grafana(
+        url=os.environ.get("GRAFANA_URL", ""),
+        token=os.environ.get("GRAFANA_TOKEN", "")
+    )
 
-        grafana_backup = Backup(grafana_client, "./data")
+    grafana_backup = Backup(grafana_client, "./data")
+    try:
         grafana_backup.backup_all()
         archive = grafana_backup.create_archive()
         bucket = os.environ.get("AWS_S3_BUCKET", "")
@@ -142,4 +144,10 @@ if __name__ == "__main__":
 
     except Exception:
         traceback.print_exc()
+
+        grafana_backup.send_notification(
+            api_url=os.environ.get("SLACK_API_URL", ""),
+            channel=os.environ.get("SLACK_CHANNEL", ""),
+            message="Backup failure!", is_failed=True
+        )
         sys.exit(1)
