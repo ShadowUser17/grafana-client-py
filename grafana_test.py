@@ -51,8 +51,11 @@ class TestGrafanaAPI(unittest.TestCase):
         self.assertTrue(resp)
 
     def test_update_folder(self) -> None:
-        folder_name = "test_grafana_v1"
+        folder_name = "test_grafana_folder_v2"
         resp = self.client.rename_folder(self.data_folder_uid, folder_name)
+        self.assertIsNot(resp, dict)
+
+        resp = self.client.get_folder_by_uid(self.data_folder_uid)
         self.assertIsNot(resp, dict)
         self.assertEqual(resp.get("title"), folder_name)
 
@@ -73,7 +76,7 @@ class TestGrafanaAPI(unittest.TestCase):
         data = resp.get("dashboard")
         self.assertEqual(data.get("uid"), self.data_dashboard_uid)
 
-        dashboard_title = "test_grafana_v1"
+        dashboard_title = "test_grafana_dashboard_v2"
         resp["dashboard"]["title"] = dashboard_title
         resp = self.client.update_dashboard(resp)
         self.assertIsNot(resp, dict)
