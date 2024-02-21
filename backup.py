@@ -4,12 +4,14 @@ import json
 import boto3
 import tarfile
 import pathlib
+import logging
 import grafana
 import datetime
 import traceback
 
 from urllib import request
 
+# DEBUG_MODE
 # GRAFANA_URL
 # GRAFANA_TOKEN
 # SLACK_API_URL
@@ -41,6 +43,7 @@ class Backup:
         path = "{}.tgz".format(time.strftime(self._backup_tmpl))
         path = str(self._base_path.joinpath(path))
 
+        logging.debug("Open archive: {}".format(path))
         with tarfile.open(path, "w:gz") as archive_file:
             for (root, _, files) in os.walk(str(self._base_path)):
                 files = filter(lambda item: item.endswith(".json"), files)
@@ -49,7 +52,7 @@ class Backup:
                     file_name = os.path.join(root, file_item)
                     archive_file.add(file_name)
 
-        print("Create archive:", path)
+        logging.info("Created archive: {}".format(path))
         return path
 
     # https://boto3.amazonaws.com/v1/documentation/api/latest/guide/s3-uploading-files.html
@@ -57,7 +60,7 @@ class Backup:
         client = boto3.client("s3")
         file = pathlib.Path(path)
         client.upload_file(str(file), bucket, file.name)
-        print("Upload archive: {} to S3 bucket: s3://{}".format(file.name, bucket))
+        logging.info("Upload archive: {} to S3 bucket: s3://{}".format(file.name, bucket))
 
     # https://api.slack.com/reference/surfaces/formatting#building-attachments
     def send_notification(self, api_url: str, channel: str, message: str, is_failed: bool = False) -> int:
@@ -82,48 +85,78 @@ class Backup:
                 return client.status
 
     def backup_folders(self) -> None:
+        logging.debug("Create directory: {}".format(self._base_path))
         self._base_path.mkdir(parents=True, exist_ok=True)
 
+        logging.debug("Run list_folders()")
         for folder_item in self._grafana.list_folders():
+            logging.debug("Current item: {}".format(folder_item))
+
             folder_path = self._base_path.joinpath(str(folder_item["id"]))
+            logging.info("Create directory: {}".format(folder_path))
             folder_path.mkdir(exist_ok=True)
-            print("Create folder directory:", folder_path)
 
+            logging.debug("Run get_folder_by_uid({})".format(folder_item["uid"]))
             tmp = json.dumps(self._grafana.get_folder_by_uid(folder_item["uid"]))
-            folder_data = folder_path.joinpath(self._folder_data)
-            folder_data.write_text(tmp)
-            print("Store folder data:", folder_data)
 
+            folder_data = folder_path.joinpath(self._folder_data)
+            logging.info("Store folder data: {}".format(folder_data))
+            folder_data.write_text(tmp)
+
+            logging.debug("Run get_folder_permissions({})".format(folder_item["uid"]))
             tmp = json.dumps(self._grafana.get_folder_permissions(folder_item["uid"]))
+
             folder_access = folder_path.joinpath(self._folder_access)
+            logging.info("Store folder access: {}".format(folder_access))
             folder_access.write_text(tmp)
-            print("Store folder access:", folder_access)
 
     def backup_dashboards(self) -> None:
+        logging.debug("Run list_folders()")
         folder_ids = self._grafana.list_folders()
-        folder_ids = map(lambda item: item["id"], folder_ids)
+        folder_ids = list(map(lambda item: item["id"], folder_ids))
 
+        logging.debug("Run list_dashboards({})".format(folder_ids))
         for dash_item in self._grafana.list_dashboards(folder_ids):
-            folder_path = self._base_path.joinpath(str(dash_item["folderId"]))
-            folder_path = folder_path.joinpath("dashboards")
-            folder_path.mkdir(parents=True, exist_ok=True)
+            logging.debug("Current item: {}".format(dash_item))
 
-            tmp = json.dumps(self._grafana.get_dashboard_by_uid(dash_item["uid"]))
-            dash_file = folder_path.joinpath("{}.json".format(dash_item["title"]))
-            dash_file.write_text(tmp)
-            print("Store dashboard data:", dash_file)
+            dash_folder_id = dash_item.get("folderId", 0)
+            logging.debug("Get folder id: {}".format(dash_folder_id))
+
+            if dash_folder_id:
+                folder_path = self._base_path.joinpath(str(dash_folder_id))
+                folder_path = folder_path.joinpath("dashboards")
+
+                logging.info("Create directory: {}".format(folder_path))
+                folder_path.mkdir(parents=True, exist_ok=True)
+
+                logging.debug("Run get_dashboard_by_uid({})".format(dash_item["uid"]))
+                tmp = json.dumps(self._grafana.get_dashboard_by_uid(dash_item["uid"]))
+
+                dash_file = folder_path.joinpath("{}.json".format(dash_item["title"]))
+                logging.info("Store dashboard data: {}".format(dash_file))
+                dash_file.write_text(tmp)
 
     def backup_datasources(self) -> None:
         ds_folder = self._base_path.joinpath("datasources")
+        logging.info("Create directory: {}".format(ds_folder))
         ds_folder.mkdir(parents=True, exist_ok=True)
 
+        logging.debug("Run list_datasources()")
         for item in self._grafana.list_datasources():
+            logging.debug("Current item: {}".format(item))
+
             ds_file = ds_folder.joinpath("{}.json".format(item["name"]))
+            logging.info("Store datasource data: {}".format(ds_file))
             ds_file.write_text(json.dumps(item))
-            print("Store datasource data:", ds_file)
 
 
 if __name__ == "__main__":
+    log_level = logging.DEBUG if os.environ.get("DEBUG_MODE", "") else logging.INFO
+    logging.basicConfig(
+        format=r'%(levelname)s [%(asctime)s]: "%(message)s"',
+        datefmt=r'%Y-%m-%d %H:%M:%S', level=log_level
+    )
+
     grafana_client = grafana.Grafana(
         url=os.environ.get("GRAFANA_URL", ""),
         token=os.environ.get("GRAFANA_TOKEN", "")
@@ -143,11 +176,12 @@ if __name__ == "__main__":
         )
 
     except Exception as error:
-        traceback.print_exc()
+        logging.error(traceback.format_exc())
 
+        message = "Failure: ({}: {})".format(error.__class__.__name__, error)
         grafana_backup.send_notification(
             api_url=os.environ.get("SLACK_API_URL", ""),
             channel=os.environ.get("SLACK_CHANNEL", ""),
-            message="Failure: ({})".format(error), is_failed=True
+            message=message, is_failed=True
         )
         sys.exit(1)
