@@ -30,6 +30,9 @@ class Backup:
         self._folder_data = "data.json"
         self._folder_access = "access.json"
 
+    def _fix_path(self, path: pathlib.Path) -> pathlib.Path:
+        return pathlib.Path(str(path).replace(" ", "_"))
+
     def backup_all(self) -> None:
         self.backup_folders()
         self.backup_dashboards()
@@ -133,6 +136,7 @@ class Backup:
                 tmp = json.dumps(self._grafana.get_dashboard_by_uid(dash_item["uid"]))
 
                 dash_file = folder_path.joinpath("{}.json".format(dash_item["title"]))
+                dash_file = self._fix_path(dash_file)
                 logging.info("Store dashboard data: {}".format(dash_file))
                 dash_file.write_text(tmp)
 
@@ -146,6 +150,7 @@ class Backup:
             logging.debug("Current item: {}".format(item))
 
             ds_file = ds_folder.joinpath("{}.json".format(item["name"]))
+            ds_file = self._fix_path(ds_file)
             logging.info("Store datasource data: {}".format(ds_file))
             ds_file.write_text(json.dumps(item))
 
