@@ -31,6 +31,8 @@ spec:
               image: "shadowuser17/grafana-data-backup:latest"
               imagePullPolicy: "Always"
               env:
+                - name: "DEBUG_MODE"
+                  value: "yes"
                 - name: "GRAFANA_URL"
                   value: "http://prom-operator-grafana.monitoring.svc:80"
                 - name: "GRAFANA_TOKEN"

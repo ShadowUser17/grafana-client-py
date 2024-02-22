@@ -77,6 +77,7 @@ client = grafana.Grafana(grafana_url, grafana_sa_token)
 
 #### How to run Backup tool:
 ```bash
+export DEBUG_MODE=""
 export GRAFANA_URL="https://grafana.k3s/"
 export GRAFANA_TOKEN=""
 export SLACK_API_URL=""
