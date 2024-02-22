@@ -140,8 +140,6 @@ class Backup:
             if dash_folder_id:
                 folder_path = self._base_path.joinpath(str(dash_folder_id))
                 folder_path = folder_path.joinpath("dashboards")
-
-                logging.info("Create directory: {}".format(folder_path))
                 folder_path.mkdir(parents=True, exist_ok=True)
 
                 logging.debug("Run get_dashboard_by_uid({})".format(dash_item["uid"]))
