@@ -24,10 +24,13 @@ def get_auth_token(client: any) -> list:
     return tmp.decode().split(":")
 
 
-def exec_command(args: list) -> int:
+def exec_command(args: list) -> None:
     logging.info("Run: {}".format(" ".join(args)))
     cmd = subprocess.Popen(args=args, shell=False)
-    return cmd.wait()
+
+    status = cmd.wait()
+    if status:
+        raise Exception("Command exit status: {} != 0".format(status))
 
 
 def error_if_empty(arg: str) -> str:
@@ -55,7 +58,7 @@ try:
     docker_cmd_path = "/usr/bin/docker"
     aws_ecr_dst_name = "{}/{}:{}".format(aws_ecr_name, image_name, image_tag)
 
-    exec_command([docker_cmd_path, "login", "-u", aws_ecr_login, "-p", aws_ecr_passwd])
+    exec_command([docker_cmd_path, "login", "-u", aws_ecr_login, "-p", aws_ecr_passwd, aws_ecr_name])
     exec_command([docker_cmd_path, "build", "-t", aws_ecr_dst_name, "."])
     exec_command([docker_cmd_path, "push", aws_ecr_dst_name])
 
