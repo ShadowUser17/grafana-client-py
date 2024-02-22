@@ -26,17 +26,27 @@ class Backup:
     def __init__(self, client: grafana.Grafana, base_dir: str) -> None:
         self._grafana = client
         self._base_path = pathlib.Path(base_dir)
+        self._backup_items = []
+        self._backup_items_file = "items.txt"
         self._backup_tmpl = r"%Y%m%d%H%M"
         self._folder_data = "data.json"
         self._folder_access = "access.json"
-
-    def _fix_path(self, path: pathlib.Path) -> pathlib.Path:
-        return pathlib.Path(str(path).replace(" ", "_"))
 
     def backup_all(self) -> None:
         self.backup_folders()
         self.backup_dashboards()
         self.backup_datasources()
+        self.create_item_list()
+
+    def update_item_list(self, name: str, file: str) -> None:
+        self._backup_items.append("\"{}\": {}".format(name, file))
+
+    def create_item_list(self) -> None:
+        path = self._base_path.joinpath(self._backup_items_file)
+
+        logging.info("Store backup items: {}".format(path))
+        data = "\n".join(self._backup_items)
+        path.write_text(data)
 
     def create_archive(self) -> str:
         '''
@@ -49,7 +59,7 @@ class Backup:
         logging.debug("Open archive: {}".format(path))
         with tarfile.open(path, "w:gz") as archive_file:
             for (root, _, files) in os.walk(str(self._base_path)):
-                files = filter(lambda item: item.endswith(".json"), files)
+                files = filter(lambda item: not item.endswith(".tgz"), files)
 
                 for file_item in files:
                     file_name = os.path.join(root, file_item)
@@ -96,6 +106,8 @@ class Backup:
             logging.debug("Current item: {}".format(folder_item))
 
             folder_path = self._base_path.joinpath(str(folder_item["id"]))
+            self.update_item_list(folder_item["title"], folder_path)
+
             logging.info("Create directory: {}".format(folder_path))
             folder_path.mkdir(exist_ok=True)
 
@@ -135,9 +147,9 @@ class Backup:
                 logging.debug("Run get_dashboard_by_uid({})".format(dash_item["uid"]))
                 tmp = json.dumps(self._grafana.get_dashboard_by_uid(dash_item["uid"]))
 
-                dash_file = folder_path.joinpath("{}.json".format(dash_item["title"]))
-                dash_file = self._fix_path(dash_file)
+                dash_file = folder_path.joinpath("{}.json".format(dash_item["uid"]))
                 logging.info("Store dashboard data: {}".format(dash_file))
+                self.update_item_list(dash_item["title"], dash_file)
                 dash_file.write_text(tmp)
 
     def backup_datasources(self) -> None:
@@ -149,8 +161,9 @@ class Backup:
         for item in self._grafana.list_datasources():
             logging.debug("Current item: {}".format(item))
 
-            ds_file = ds_folder.joinpath("{}.json".format(item["name"]))
-            ds_file = self._fix_path(ds_file)
+            ds_file = ds_folder.joinpath("{}.json".format(item["id"]))
+            self.update_item_list(item["name"], ds_file)
+
             logging.info("Store datasource data: {}".format(ds_file))
             ds_file.write_text(json.dumps(item))
 
