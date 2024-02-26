@@ -15,10 +15,8 @@ import subprocess
 # AWS_SECRET_ACCESS_KEY
 
 
+# return ["user", "password"]
 def get_auth_token(client: any) -> list:
-    '''
-    return ["user", "password"]
-    '''
     responce = client.get_authorization_token()
     tmp = base64.b64decode(responce["authorizationData"][0]["authorizationToken"])
     return tmp.decode().split(":")
