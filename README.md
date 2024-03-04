@@ -66,7 +66,7 @@ docker logout "${AWS_ECR_NAME}"
 
 #### How to deploy to K8S:
 - For AWS deploy need to create policy and role first!
-- Get cronjob from `examples` and edit.
+- Get cronjob from `deploy` and edit.
 - Apply the edited file from `kubectl` command.
 
 #### Change cronjob schedule time:
