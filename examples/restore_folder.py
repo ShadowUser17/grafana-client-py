@@ -5,13 +5,13 @@ import grafana
 import pathlib
 import traceback
 
-# GRAFANA_FOLDER
+# FOLDER_PATH
 # GRAFANA_URL
 # GRAFANA_TOKEN
 
 
 try:
-    folder_base = pathlib.Path(os.environ.get("GRAFANA_FOLDER"))
+    folder_base = pathlib.Path(os.environ.get("FOLDER_PATH"))
     folder_data = folder_base.joinpath("data.json")
     folder_access = folder_base.joinpath("access.json")
 
