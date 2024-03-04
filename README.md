@@ -84,13 +84,6 @@ kubectl -n testing patch cronjob grafana-backup -p '{"spec": {"suspend": true}}'
 kubectl -n testing delete jobs -l "app=grafana-backup"
 ```
 
-#### How to use Grafana client:
-```python
-import grafana
-
-client = grafana.Grafana(grafana_url, grafana_sa_token)
-```
-
 #### How to run Backup tool:
 ```bash
 export DEBUG_MODE=""
