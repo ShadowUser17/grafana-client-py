@@ -33,3 +33,7 @@ import grafana
 
 client = grafana.Grafana(grafana_url, grafana_sa_token)
 ```
+
+#### Tutorials for other tools:
+- [backup-tool](docs/Backup.md)
+- [restore-scripts](docs/Restore.md)
