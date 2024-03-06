@@ -23,7 +23,13 @@ try:
     folder_uid = data["uid"]
 
     data = json.loads(dashboard_path.read_text())
-    print(grafana_client.create_dashboard(data, folder_uid))
+    dash_uid = data["dashboard"]["uid"]
+
+    if grafana_client.get_dashboard_by_uid(dash_uid):
+        print(grafana_client.update_dashboard(data))
+
+    else:
+        print(grafana_client.create_dashboard(data, folder_uid))
 
 except Exception:
     traceback.print_exc()
