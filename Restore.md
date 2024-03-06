@@ -1,3 +1,13 @@
+#### How to download backup:
+```bash
+export AWS_ENDPOINT_URL="http://minio-api.k3s"
+export AWS_ACCESS_KEY_ID="testing"
+export AWS_SECRET_ACCESS_KEY='1qaz!QAZ'
+```
+```bash
+./env/bin/python3 get_backup.py backups 202403052200.tgz
+```
+
 #### How to restore folder:
 ```bash
 export FOLDER_PATH="data/85"
