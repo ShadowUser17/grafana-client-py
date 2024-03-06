@@ -1,8 +1,8 @@
 import os
 import sys
 import json
-import grafana
 import pathlib
+import grafana
 import traceback
 
 # FOLDER_PATH
@@ -21,9 +21,14 @@ try:
     )
 
     data = json.loads(folder_data.read_text())
-    print(grafana_client.create_folder_by_raw(data))
-
     folder_uid = data["uid"]
+
+    if grafana_client.get_folder_by_uid(folder_uid):
+        print(grafana_client.update_folder_by_raw(folder_uid, data))
+
+    else:
+        print(grafana_client.create_folder_by_raw(data))
+
     data = json.loads(folder_access.read_text())
     print(grafana_client.update_folder_permissions(folder_uid, data))
 
