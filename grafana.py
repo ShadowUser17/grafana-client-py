@@ -3,6 +3,7 @@ import json
 import uuid
 
 from urllib import request
+from urllib import error as errors
 from urllib import parse as urllib
 
 
@@ -17,15 +18,26 @@ class Grafana:
             "Authorization": "Bearer {}".format(token)
         }
 
+        self.last_status = 0
+
     def _mkurl(self, path: str) -> str:
         return str(urllib.urljoin(self._url, path))
 
-    def _request(self, req: request.Request) -> dict:
+    def _request(self, req: request.Request, ignore_status: int = 0) -> dict:
         req.headers = self._headers
         ctx = None if self._verify else ssl._create_unverified_context()
 
-        with request.urlopen(url=req, context=ctx) as client:
-            return json.loads(client.read())
+        try:
+            with request.urlopen(url=req, context=ctx) as client:
+                self.last_status = client.status
+                return json.loads(client.read())
+
+        except errors.HTTPError as error:
+            if error.status != ignore_status:
+                raise error
+
+            self.last_status = error.status
+            return {}
 
     @property
     def url(self) -> urllib.ParseResult:
@@ -41,13 +53,13 @@ class Grafana:
     def get_folder_by_id(self, folder_id: int) -> dict:
         return self._request(request.Request(
             method="GET", url=self._mkurl("/api/folders/id/{}".format(folder_id))
-        ))
+        ), ignore_status=404)
 
     # https://grafana.com/docs/grafana/latest/developers/http_api/folder/#get-folder-by-uid
     def get_folder_by_uid(self, uid: str) -> dict:
         return self._request(request.Request(
             method="GET", url=self._mkurl("/api/folders/{}".format(uid))
-        ))
+        ), ignore_status=404)
 
     # https://grafana.com/docs/grafana/latest/developers/http_api/folder_permissions/#get-permissions-for-a-folder
     def get_folder_permissions(self, uid: str) -> list:
@@ -110,7 +122,7 @@ class Grafana:
     def get_dashboard_by_uid(self, uid: str) -> dict:
         return self._request(request.Request(
             method="GET", url=self._mkurl("/api/dashboards/uid/{}".format(uid))
-        ))
+        ), ignore_status=404)
 
     # https://grafana.com/docs/grafana/latest/developers/http_api/dashboard/#create--update-dashboard
     def update_dashboard(self, data: dict) -> dict:
@@ -148,13 +160,13 @@ class Grafana:
     def get_datasource_by_uid(self, uid: str) -> dict:
         return self._request(request.Request(
             method="GET", url=self._mkurl("/api/datasources/uid/{}".format(uid))
-        ))
+        ), ignore_status=404)
 
     # https://grafana.com/docs/grafana/latest/developers/http_api/data_source/#get-a-single-data-source-by-name
     def get_datasource_by_name(self, name: str) -> dict:
         return self._request(request.Request(
             method="GET", url=self._mkurl("/api/datasources/name/{}".format(name))
-        ))
+        ), ignore_status=404)
 
     # https://grafana.com/docs/grafana/latest/developers/http_api/data_source/#create-a-data-source
     def create_datasource(self, data: dict) -> dict:
