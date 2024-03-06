@@ -19,7 +19,13 @@ try:
     )
 
     data = json.loads(datasource_path.read_text())
-    print(grafana_client.create_datasource(data))
+    ds_uid = data["uid"]
+
+    if grafana_client.get_datasource_by_uid(ds_uid):
+        print(grafana_client.update_datasource(ds_uid, data))
+
+    else:
+        print(grafana_client.create_datasource(data))
 
 except Exception:
     traceback.print_exc()
