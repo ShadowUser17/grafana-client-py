@@ -5,7 +5,10 @@ export AWS_ACCESS_KEY_ID="testing"
 export AWS_SECRET_ACCESS_KEY='1qaz!QAZ'
 ```
 ```bash
-./env/bin/python3 get_backup.py backups 202403052200.tgz
+./env/bin/python3 get_backup.py backups
+```
+```bash
+./env/bin/python3 get_backup.py backups --path="202403052200.tgz"
 ```
 
 #### How to restore folder:
