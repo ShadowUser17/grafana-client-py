@@ -26,6 +26,7 @@ try:
     dash_uid = data["dashboard"]["uid"]
 
     if grafana_client.get_dashboard_by_uid(dash_uid):
+        data["folderUid"] = folder_uid
         print(grafana_client.update_dashboard(data))
 
     else:
