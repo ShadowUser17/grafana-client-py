@@ -32,7 +32,7 @@ trivy image "shadowuser17/grafana-data-backup:latest"
 docker login -u "${DOCKERHUB_LOGIN}" -p "${DOCKERHUB_TOKEN}"
 ```
 ```bash
-docker push --all-tags "shadowuser17/grafana-data-backup"
+docker push "shadowuser17/grafana-data-backup:latest"
 ```
 
 #### Publish docker image to AWS/ECR:
