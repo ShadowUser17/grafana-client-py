@@ -15,8 +15,13 @@ export AWS_SECRET_ACCESS_KEY=""
 ```
 
 #### Build docker image:
+- Stable version:
 ```bash
 docker build -t "shadowuser17/grafana-data-backup:latest" .
+```
+- Testing version:
+```bash
+docker build -t "shadowuser17/grafana-data-backup:testing" .
 ```
 
 #### Scan docker image:
