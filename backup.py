@@ -64,9 +64,11 @@ class Backup:
     # https://api.slack.com/messaging/webhooks#advanced_message_formatting
     def send_notification(self, api_url: str, channel: str, message: str) -> int:
         if api_url and channel:
-            data = json.dumps({"channel": channel, "text": message})
-            headers = {"Content-type": "application/json"}
+            data = json.dumps({
+                "username": "grafana-backup", "channel": channel, "text": message
+            })
 
+            headers = {"Content-type": "application/json"}
             req = request.Request(
                 method="POST", url=api_url, headers=headers, data=data.encode()
             )

@@ -44,10 +44,12 @@ client = grafana.Grafana(grafana_url, grafana_sa_token)
 
 #### How to run Backup tool:
 ```bash
-export AWS_S3_BUCKET="backups"
 export GRAFANA_URL="https://grafana.k3s/"
 export GRAFANA_TOKEN=""
+export SLACK_API_URL=""
+export SLACK_CHANNEL=""
 export AWS_ENDPOINT_URL="http://minio-api.k3s"
+export AWS_S3_BUCKET="backups"
 export AWS_ACCESS_KEY_ID=""
 export AWS_SECRET_ACCESS_KEY=""
 ```
