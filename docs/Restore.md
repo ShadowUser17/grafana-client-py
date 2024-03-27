@@ -1,8 +1,8 @@
 #### How to download backup:
 ```bash
 export AWS_ENDPOINT_URL="http://minio-api.k3s"
-export AWS_ACCESS_KEY_ID="testing"
-export AWS_SECRET_ACCESS_KEY='1qaz!QAZ'
+export AWS_ACCESS_KEY_ID=""
+export AWS_SECRET_ACCESS_KEY=""
 ```
 ```bash
 ./env/bin/python3 get_backup.py backups
