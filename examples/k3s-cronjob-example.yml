@@ -16,6 +16,8 @@ spec:
     metadata:
       labels:
         app: "grafana-backup"
+      annotations:
+        promtail.io/collect: "true"
     spec:
       backoffLimit: 3
       template:
