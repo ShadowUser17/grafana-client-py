@@ -15,13 +15,17 @@ export AWS_SECRET_ACCESS_KEY=""
 ```
 
 #### Build docker image:
-- Stable version:
+- Prune build cache:
 ```bash
-docker build -t "shadowuser17/grafana-data-backup:latest" .
+earthly prune
 ```
-- Testing version:
+- Build stable version:
 ```bash
-docker build -t "shadowuser17/grafana-data-backup:testing" .
+earthly +all --tag="latest"
+```
+- Build testing version:
+```bash
+earthly +all --tag="testing"
 ```
 
 #### Scan docker image:
@@ -37,7 +41,7 @@ trivy image "shadowuser17/grafana-data-backup:latest"
 docker login -u "${DOCKERHUB_LOGIN}" -p "${DOCKERHUB_TOKEN}"
 ```
 ```bash
-docker push "shadowuser17/grafana-data-backup:latest"
+earthly --push +all --tag="latest"
 ```
 
 #### Publish docker image to AWS/ECR:
