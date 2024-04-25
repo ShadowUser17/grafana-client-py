@@ -1,4 +1,4 @@
-#### Grafana API client on pure Python.
+#### Grafana API client.
 - Official Grafana API reference: [API](https://grafana.com/docs/grafana/latest/developers/http_api/)
 
 #### Implemented functional:
