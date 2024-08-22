@@ -24,6 +24,9 @@ python3 -m venv --upgrade-deps env && \
 
 #### Run unit tests:
 ```bash
+export GRAFANA_TOKEN=''
+```
+```bash
 ./env/bin/python3 grafana_test.py -v
 ```
 
