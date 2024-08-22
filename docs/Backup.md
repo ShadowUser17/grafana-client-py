@@ -30,10 +30,10 @@ earthly +all --tag="testing"
 
 #### Scan docker image:
 ```bash
-dockle "shadowuser17/grafana-data-backup:latest"
+dockle "shadowuser17/grafana-data-backup:testing"
 ```
 ```bash
-trivy image "shadowuser17/grafana-data-backup:latest"
+trivy image "shadowuser17/grafana-data-backup:testing"
 ```
 
 #### Publish docker image:
@@ -42,6 +42,9 @@ docker login -u "${DOCKERHUB_LOGIN}" -p "${DOCKERHUB_TOKEN}"
 ```
 ```bash
 earthly --push +all --tag="latest"
+```
+```bash
+earthly --push +all --tag="testing"
 ```
 
 #### Publish docker image to AWS/ECR:
