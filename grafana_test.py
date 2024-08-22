@@ -8,7 +8,7 @@ class TestGrafanaAPI(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         cls.client = grafana.Grafana(
-            url=os.environ.get("GRAFANA_URL", ""),
+            url=os.environ.get("GRAFANA_URL", "http://grafana.k3s"),
             token=os.environ.get("GRAFANA_TOKEN", "")
         )
 
